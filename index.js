@@ -54,20 +54,6 @@ app.post("/addpatient", async (req, res) => {
   }
 });
 
-app.get("/getpatient/:PID", async (req, res) => {
-  let pid = req.params.PID;
-  try {
-    const patient = await PatientModel.findOne({ PID: pid }).lean();
-    if (patient) {
-      return res.json(patient);
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (err) {
-    res.status(500).send('Error fetching patient: ' + err.message);
-  }
-});
-
 // Update patient by PID
 app.put("/updatepatient/pid/:PID", async (req, res) => {
   const pid = req.params.PID;
@@ -120,5 +106,23 @@ app.delete("/deletepatient/:PID", async (req, res) => {
     }
   } catch (err) {
     res.status(500).send("Error deleting patient: " + err.message);
+  }
+});
+
+// Search patients using query parameters
+app.get("/searchpatients", async (req, res) => {
+  const query = {};
+  if (req.query.PID) query.PID = req.query.PID;
+  if (req.query.FirstName) query.FirstName = req.query.FirstName;
+  if (req.query.LastName) query.LastName = req.query.LastName;
+  if (req.query.Email) query.Email = req.query.Email;
+  if (req.query.NearCity) query.NearCity = req.query.NearCity;
+  if (req.query.Doctor) query.Doctor = req.query.Doctor;
+  if (req.query.Guardian) query.Guardian = req.query.Guardian;
+  try {
+    const patients = await PatientModel.find(query).lean();
+    res.json(patients);
+  } catch (err) {
+    res.status(500).send('Error searching patients: ' + err.message);
   }
 });
