@@ -36,22 +36,20 @@ const patientSchema = new mongoose.Schema({
 const PatientModel = mongoose.model('Patient', patientSchema);
 
 app.get("/patients", async (req, res) => {
-  if (req.query.PID) {
-    let pid = req.query.PID;
-    try {
-      const patient = await PatientModel.findOne({ PID: pid }).lean();
-      if (patient) {
-        return res.json(patient);
-      } else {
-        return res.sendStatus(404);
-      }
-    } catch (err) {
-      return res.status(500).send('Error fetching patient: ' + err.message);
+  // Build a dynamic query object from request query parameters
+  const query = {};
+  // Only include fields that exist in the schema
+  const allowedFields = [
+    "PID", "FirstName", "LastName", "Email", "NearCity", "Doctor", "Guardian", "Status", "LastVisitDate"
+  ];
+  for (const key of Object.keys(req.query)) {
+    if (allowedFields.includes(key)) {
+      query[key] = req.query[key];
     }
   }
   try {
-    const dbPatients = await PatientModel.find({}).lean();
-    res.json(dbPatients);
+    const patients = await PatientModel.find(query).lean();
+    res.json(patients); // Always return an array, even if empty
   } catch (err) {
     res.status(500).send('Error fetching patients: ' + err.message);
   }
