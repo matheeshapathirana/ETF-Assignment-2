@@ -35,41 +35,7 @@ const patientSchema = new mongoose.Schema({
 });
 const PatientModel = mongoose.model('Patient', patientSchema);
 
-app.get("/patients", async (req, res) => {
-  // Build a dynamic query object from request query parameters
-  const query = {};
-  // Only include fields that exist in the schema
-  const allowedFields = [
-    "PID", "FirstName", "LastName", "Email", "NearCity", "Doctor", "Guardian", "Status", "LastVisitDate"
-  ];
-  for (const key of Object.keys(req.query)) {
-    if (allowedFields.includes(key)) {
-      query[key] = req.query[key];
-    }
-  }
-  try {
-    const patients = await PatientModel.find(query).lean();
-    res.json(patients); // Always return an array, even if empty
-  } catch (err) {
-    res.status(500).send('Error fetching patients: ' + err.message);
-  }
-});
-
-app.get("/patient/:PID", async (req, res) => {
-  let pid = req.params.PID;
-  try {
-    const patient = await PatientModel.findOne({ PID: pid }).lean();
-    if (patient) {
-      return res.json(patient);
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (err) {
-    res.status(500).send('Error fetching patient: ' + err.message);
-  }
-});
-
-app.post("/patient", async (req, res) => {
+app.post("/addpatient", async (req, res) => {
   const newPatient = req.body;
   // Validate new patient object
   if (!newPatient || !newPatient.PID || !newPatient.FirstName || !newPatient.LastName || !newPatient.Email || !newPatient.NearCity || !newPatient.Doctor || !newPatient.Guardian || !newPatient.Status || !newPatient.LastVisitDate) {
@@ -85,5 +51,19 @@ app.post("/patient", async (req, res) => {
     } else {
       res.status(500).send('Error saving to MongoDB: ' + err.message);
     }
+  }
+});
+
+app.get("/getpatient/:PID", async (req, res) => {
+  let pid = req.params.PID;
+  try {
+    const patient = await PatientModel.findOne({ PID: pid }).lean();
+    if (patient) {
+      return res.json(patient);
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (err) {
+    res.status(500).send('Error fetching patient: ' + err.message);
   }
 });
