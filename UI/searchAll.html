@@ -14,13 +14,93 @@
                 display: flex;
                 flex-direction: column;
             }
-
             main {
                 flex: 1;
+            }
+            .dark-mode {
+                background-color: #181a1b !important;
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-dark,
+            .dark-mode.bg-dark {
+                background-color: #23272b !important;
+            }
+            .dark-mode .navbar,
+            .dark-mode footer {
+                background-color: #23272b !important;
+            }
+            .dark-mode .form-control,
+            .dark-mode .form-select {
+                background-color: #23272b;
+                color: #f8f9fa;
+                border-color: #495057;
+            }
+            .dark-mode .form-control:focus,
+            .dark-mode .form-select:focus {
+                background-color: #23272b;
+                color: #f8f9fa;
+            }
+            .dark-mode .text-dark {
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-white {
+                background-color: #23272b !important;
             }
         </style>
     </head>
     <body>
+        <script>
+            
+            $(document).ready(function () {
+                // dark mode button
+                const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
+                // Append the button to the navbar
+                $('.navbar .container-fluid').append(btn);
+
+                function setDarkMode(isDark) {
+                    $('body, html').toggleClass('dark-mode', isDark);
+                    btn.text(isDark ? 'Light Mode' : 'Dark Mode');
+                    localStorage.setItem('darkMode', isDark ? '1' : '0');
+                }
+
+                // set initial mode from localStorage which is a built in js function
+                setDarkMode(localStorage.getItem('darkMode') === '1');
+
+                btn.on('click', function () {
+                    setDarkMode(!$('body').hasClass('dark-mode'));
+                });
+
+                //to see if the search field is empty or not
+                $('#searchForm').on('submit', function (e) {
+                    e.preventDefault();
+                    const searchValue = $('#searchValue').val().trim();
+                    if (searchValue === '') {
+                        alert('Please enter a search term.');
+                        return;
+                    }
+                    //else proceed with the search
+                    fetchSearchResults();
+                });
+                //to check if PID is a valid number
+                $('#searchValue').on('input', function () {
+                    const searchType = $('#searchType').val();
+                    const searchValue = $(this).val().trim();
+                    if (searchType === 'pid' && searchValue !== '' && isNaN(searchValue)) {
+                        alert('Please enter a valid Patient ID (numeric value).');
+                        $(this).val('');
+                    }
+                });
+                //to check if email is valid
+                $('#searchValue').on('input', function () {
+                    const searchType = $('#searchType').val();
+                    const searchValue = $(this).val().trim();
+                    if (searchType === 'email' && searchValue !== '' && !validateEmail(searchValue)) {
+                        alert('Please enter a valid email address.');
+                        $(this).val('');
+                    }
+                });
+            });
+        </script>
         <!--navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
@@ -46,24 +126,28 @@
         <div class="container mt-4">
             <div style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
                 <div class="bg-dark text-white px-3 py-2">
-                    <h5 class="mb-0">Search Patient</h5>
+                    <h5 class="mb-0">Search Patient by Type</h5>
                 </div>
 
                 <!-- Form section with padding -->
                 <section id="searchSection" class="p-4">
                     <form id="searchForm" class="row g-3 justify-content-center align-items-end">
-                        <div class="col-md-7">
+                        <div class="col-md-4">
                             <label for="searchType" class="form-label">Search by</label>
                             <select class="form-select" id="searchType" name="searchType" required>
                                 <option selected disabled>Select option</option>
-                                <option value="pid">Patient ID</option>
-                                <option value="firstName">First Name</option>
-                                <option value="lastName">Last Name</option>
-                                <option value="email">Email</option>
-                                <option value="doctor">Doctor</option>
-                                <option value="NearestCity">Nearest City</option>
+                                <option value="pid">By Patient ID</option>
+                                <option value="firstName">By First Name</option>
+                                <option value="lastName">By Last Name</option>
+                                <option value="email">By Email</option>
+                                <option value="doctor">By Doctor</option>
+                                <option value="NearestCity">By Nearest City</option>
                                 <option value="guardian">Guardian</option>
                             </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="searchValue" class="form-label">Search term:</label>
+                            <input type="text" class="form-control" id="searchValue" name="searchValue" placeholder="Enter search value" required>
                         </div>
                         <div class="col-md-4 d-grid">
                             <button type="submit" class="btn btn-warning">Search</button>
@@ -83,13 +167,13 @@
                     <table class="table table-striped " id="resultsTable">
                         <thead>
                             <tr>
-                                <th>By Patient ID</th>
-                                <th>By First Name</th>
-                                <th>By Last Name</th>
-                                <th>By Email</th>
-                                <th>By Nearest City</th>
-                                <th>By Doctor</th>
-                                <th>By Guardian</th>
+                                <th>Patient ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Nearest City</th>
+                                <th>Doctor</th>
+                                <th>Guardian</th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody">

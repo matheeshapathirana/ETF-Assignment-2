@@ -18,6 +18,34 @@
             main {
                 flex: 1;
             }
+            .dark-mode {
+                background-color: #181a1b !important;
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-dark {
+                background-color: #23272b !important;
+            }
+            .dark-mode .navbar,
+            .dark-mode footer {
+                background-color: #23272b !important;
+            }
+            .dark-mode .form-control,
+            .dark-mode .form-select {
+                background-color: #23272b;
+                color: #f8f9fa;
+                border-color: #495057;
+            }
+            .dark-mode .form-control:focus,
+            .dark-mode .form-select:focus {
+                background-color: #23272b;
+                color: #f8f9fa;
+            }
+            .dark-mode .text-dark {
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-white {
+                background-color: #23272b !important;
+            }
         </style>
     </head>
     <body>
@@ -80,6 +108,22 @@
                     if (val.length > 0) {
                         $(this).val(val.charAt(0).toUpperCase() + val.slice(1).toLowerCase());
                     }
+                });
+
+                // Dark mode toggle 
+                const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
+                function setDarkMode(isDark) {
+                    $('body, html').toggleClass('dark-mode', isDark);
+                    btn.text(isDark ? 'Light Mode' : 'Dark Mode');
+                    localStorage.setItem('darkMode', isDark ? '1' : '0');
+                }
+                // Insert button into navbar
+                $('.navbar .container-fluid').append(btn);
+                // Restore preference on load
+                setDarkMode(localStorage.getItem('darkMode') === '1');
+                // Toggle on click
+                btn.on('click', function() {
+                    setDarkMode(!$('body').hasClass('dark-mode'));
                 });
             });
         </script>

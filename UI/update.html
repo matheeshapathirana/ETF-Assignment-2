@@ -30,6 +30,34 @@
             .card-body {
                 padding: 1rem;
             }
+            .dark-mode {
+                background-color: #181a1b !important;
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-dark {
+                background-color: #23272b !important;
+            }
+            .dark-mode .navbar,
+            .dark-mode footer {
+                background-color: #23272b !important;
+            }
+            .dark-mode .form-control,
+            .dark-mode .form-select {
+                background-color: #23272b;
+                color: #f8f9fa;
+                border-color: #495057;
+            }
+            .dark-mode .form-control:focus,
+            .dark-mode .form-select:focus {
+                background-color: #23272b;
+                color: #f8f9fa;
+            }
+            .dark-mode .text-dark {
+                color: #f8f9fa !important;
+            }
+            .dark-mode .bg-white {
+                background-color: #23272b !important;
+            }
         </style>
     </head>
     <body>
@@ -194,6 +222,21 @@
                             });
                     }
                 }
+                // Dark mode button setup
+                const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
+                function setDarkMode(isDark) {
+                    $('body, html').toggleClass('dark-mode', isDark);
+                    btn.text(isDark ? 'Light Mode' : 'Dark Mode');
+                    localStorage.setItem('darkMode', isDark ? '1' : '0');
+                }
+                // Append the button to the navbar
+                $('.navbar .container-fluid').append(btn);
+                // Set initial dark mode state from localStorage
+                setDarkMode(localStorage.getItem('darkMode') === '1');
+                // Toggle dark mode on button click
+                btn.on('click', function() {
+                    setDarkMode(!$('body').hasClass('dark-mode'));
+                });
                 
                 // Search patient form submission
                 $('#searchPatientForm').submit(function(e) {
