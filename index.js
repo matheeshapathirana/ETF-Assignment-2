@@ -107,3 +107,18 @@ app.put("/updatepatient/firstname/:FirstName", async (req, res) => {
     res.status(500).send("Error updating patient: " + err.message);
   }
 });
+
+// Delete patient by PID
+app.delete("/deletepatient/:PID", async (req, res) => {
+  const pid = req.params.PID;
+  try {
+    const deleted = await PatientModel.findOneAndDelete({ PID: pid }).lean();
+    if (deleted) {
+      res.json({ message: "Patient deleted", patient: deleted });
+    } else {
+      res.status(404).send("Patient not found");
+    }
+  } catch (err) {
+    res.status(500).send("Error deleting patient: " + err.message);
+  }
+});
