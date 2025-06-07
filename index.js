@@ -11,70 +11,81 @@ app.listen(3000, () => {
 console.log("Server running on port 3000");
 });
 
-let students = [{"id":1, "name": "Nimal", "Address": "Malabe"}];
-let student = {"id":53, "name": "Saman", "Address": "Colombo 3"};
-students.push(student);
-
 // MongoDB connection
-mongoose.connect('mongodb+srv://user:user2006@etf-assignment.cp8rdvk.mongodb.net/?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://user:user2006@etf-assignment.cp8rdvk.mongodb.net/Patients?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('Connected to MongoDB Atlas'))
+}).then(() => console.log('Connected to MongoDB Atlas (Patients database)'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Student schema
-const studentSchema = new mongoose.Schema({
-    id: { type: Number, required: true, unique: true },
-    name: { type: String, required: true },
-    Address: { type: String, required: true }
+// Patient schema
+const patientSchema = new mongoose.Schema({
+  PID: { type: String, required: true, unique: true },
+  FirstName: { type: String, required: true },
+  LastName: { type: String, required: true },
+  Email: { type: String, required: true },
+  NearCity: { type: String, required: true },
+  Doctor: { type: String, required: true },
+  Guardian: { type: String, required: true },
+  MedicalConditions: [String],
+  Medications: [String],
+  Allergies: [String],
+  Status: { type: String, required: true },
+  LastVisitDate: { type: String, required: true }
 });
-const StudentModel = mongoose.model('Student', studentSchema);
+const PatientModel = mongoose.model('Patient', patientSchema);
 
-app.get("/students", (req, res)=> {
-    if (req.query.id) {
-        let sid = parseInt(req.query.id);
-        // Filter out invalid student objects
-        let tempStu = students.find((x) => x && typeof x.id !== 'undefined' && x.id === sid);
-        if (tempStu) {
-            // Return only name and Address
-            return res.json({ name: tempStu.name, Address: tempStu.Address });
-        } else {
-            return res.sendStatus(404);
-        }
-    }
-    // Filter out invalid student objects before returning
-    res.json(students.filter(x => x && typeof x.id !== 'undefined'));
-});
-app.get("/student/:id", (req, res)=> {
-    let sid=parseInt(req.params.id);
-//assigned the first student object from the students array that matches the given sid
-    let tempStu=students.filter((x) => x.id == sid)[0];
-    if(tempStu){
-//If a matching student is foundm responds with the tempStu object as a JSON response using res.json(tempStu). Otherwise, it sends a 404 status code using res.sendStatus(404).
-      res.json(tempStu);
-    }
-    else{
-      res.sendStatus(404);     
-    }    
-});
-
-app.post("/student", async (req, res)=> {
-    const newstudent = req.body;
-    // Validate new student object
-    if (!newstudent || typeof newstudent.id === 'undefined' || !newstudent.name || !newstudent.Address) {
-        return res.status(400).send('Invalid student object');
-    }
-    students.push(newstudent);
-    // Save to MongoDB
+app.get("/patients", async (req, res) => {
+  if (req.query.PID) {
+    let pid = req.query.PID;
     try {
-        const studentDoc = new StudentModel(newstudent);
-        await studentDoc.save();
-        res.send('Student is added to the list and saved to MongoDB');
+      const patient = await PatientModel.findOne({ PID: pid }).lean();
+      if (patient) {
+        return res.json(patient);
+      } else {
+        return res.sendStatus(404);
+      }
     } catch (err) {
-        if (err.code === 11000) {
-            res.status(409).send('Student with this id already exists in MongoDB');
-        } else {
-            res.status(500).send('Error saving to MongoDB: ' + err.message);
-        }
+      return res.status(500).send('Error fetching patient: ' + err.message);
     }
+  }
+  try {
+    const dbPatients = await PatientModel.find({}).lean();
+    res.json(dbPatients);
+  } catch (err) {
+    res.status(500).send('Error fetching patients: ' + err.message);
+  }
+});
+
+app.get("/patient/:PID", async (req, res) => {
+  let pid = req.params.PID;
+  try {
+    const patient = await PatientModel.findOne({ PID: pid }).lean();
+    if (patient) {
+      return res.json(patient);
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (err) {
+    res.status(500).send('Error fetching patient: ' + err.message);
+  }
+});
+
+app.post("/patient", async (req, res) => {
+  const newPatient = req.body;
+  // Validate new patient object
+  if (!newPatient || !newPatient.PID || !newPatient.FirstName || !newPatient.LastName || !newPatient.Email || !newPatient.NearCity || !newPatient.Doctor || !newPatient.Guardian || !newPatient.Status || !newPatient.LastVisitDate) {
+    return res.status(400).send('Invalid patient object');
+  }
+  try {
+    const patientDoc = new PatientModel(newPatient);
+    await patientDoc.save();
+    res.send('Patient is saved to MongoDB');
+  } catch (err) {
+    if (err.code === 11000) {
+      res.status(409).send('Patient with this PID already exists in MongoDB');
+    } else {
+      res.status(500).send('Error saving to MongoDB: ' + err.message);
+    }
+  }
 });
