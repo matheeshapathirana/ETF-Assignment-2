@@ -67,3 +67,43 @@ app.get("/getpatient/:PID", async (req, res) => {
     res.status(500).send('Error fetching patient: ' + err.message);
   }
 });
+
+// Update patient by PID
+app.put("/updatepatient/pid/:PID", async (req, res) => {
+  const pid = req.params.PID;
+  const updateData = req.body;
+  try {
+    const updated = await PatientModel.findOneAndUpdate(
+      { PID: pid },
+      updateData,
+      { new: true }
+    ).lean();
+    if (updated) {
+      res.json({ message: "Patient updated", patient: updated });
+    } else {
+      res.status(404).send("Patient not found");
+    }
+  } catch (err) {
+    res.status(500).send("Error updating patient: " + err.message);
+  }
+});
+
+// Update patient by First Name
+app.put("/updatepatient/firstname/:FirstName", async (req, res) => {
+  const firstName = req.params.FirstName;
+  const updateData = req.body;
+  try {
+    const updated = await PatientModel.findOneAndUpdate(
+      { FirstName: firstName },
+      updateData,
+      { new: true }
+    ).lean();
+    if (updated) {
+      res.json({ message: "Patient updated", patient: updated });
+    } else {
+      res.status(404).send("Patient not found");
+    }
+  } catch (err) {
+    res.status(500).send("Error updating patient: " + err.message);
+  }
+});
