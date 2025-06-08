@@ -73,23 +73,44 @@
                 //to see if the search field is empty or not
                 $('#searchForm').on('submit', function (e) {
                     e.preventDefault();
+
+                    const searchType = $('#searchType').val();
                     const searchValue = $('#searchValue').val().trim();
+
+                    if (!searchType) {
+                        alert('Please select a search type.');
+                        return;
+                    }
+
                     if (searchValue === '') {
                         alert('Please enter a search term.');
                         return;
                     }
-                    //else proceed with the search
-                    fetchSearchResults();
+                    // If valid, calls fetchSearchResults to perform the search and display results.
+                    fetchSearchResults(searchType, searchValue);
+                    //reset the search field after submission
+                    $('#searchValue').val('');
                 });
-                //to check if email is valid
+                //email validation
                 $('#searchValue').on('input', function () {
-                    const searchType = $('#searchType').val();
-                    const searchValue = $(this).val().trim();
-                    if (searchType === 'email' && searchValue !== '' && !validateEmail(searchValue)) {
-                        alert('Please enter a valid email address.');
-                        $(this).val('');
-                    }
-                });
+                        const searchType = $('#searchType').val();
+                        const email = $(this).val().trim();
+
+                        if (searchType === 'email') {
+                            if (!validateEmail(email)) {
+                                $(this).addClass('is-invalid');
+                            } else {
+                                $(this).removeClass('is-invalid');
+                            }
+                        } else {
+                            $(this).removeClass('is-invalid');
+                        }
+                    });
+                // Email validation function
+                function validateEmail(email) {
+                    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    return re.test(email);
+                }
             });
         </script>
         <!--navbar-->
@@ -125,7 +146,7 @@
                     <form id="searchForm" class="row g-3 justify-content-center align-items-end">
                         <div class="col-md-4">
                             <label for="searchType" class="form-label">Search by</label>
-                            <select class="form-select" id="searchType" name="searchType" required>
+                            <select class="form-select" id="searchType" name="searchType">
                                 <option selected disabled>Select option</option>
                                 <option value="pid">By Patient ID</option>
                                 <option value="firstName">By First Name</option>
@@ -138,7 +159,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="searchValue" class="form-label">Search term:</label>
-                            <input type="text" class="form-control" id="searchValue" name="searchValue" placeholder="Enter search value" required>
+                            <input type="text" class="form-control" id="searchValue" name="searchValue" placeholder="Enter search value">
                         </div>
                         <div class="col-md-4 d-grid">
                             <button type="submit" id="searchBtn" class="btn btn-warning">Search</button>
