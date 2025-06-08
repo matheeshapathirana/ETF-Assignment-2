@@ -93,13 +93,38 @@
                         $('#email').removeClass('is-invalid');
                     }
 
-                    alert('Patient added successfully!');
-
-                    // Reset form and remove validation classes
-                    this.reset();
-                    $(this).find('.is-invalid').removeClass('is-invalid');
-                    // Re-autofill today's date after reset
-                    $("#lastVisit").val(new Date().toISOString().split("T")[0]);
+                    // --- AJAX to backend ---
+                    const data = {
+                        PID: $('#pid').val(),
+                        FirstName: $('#firstName').val(),
+                        LastName: $('#lastName').val(),
+                        Email: $('#email').val(),
+                        Guardian: $('#guardian').val(),
+                        NearCity: $('#nearCity').val(),
+                        Doctor: $('#doctor').val(),
+                        Status: $('#status').val(),
+                        LastVisitDate: $('#lastVisit').val(),
+                        MedicalConditions: $('#medicalConditions').val() ? $('#medicalConditions').val().split(',').map(s => s.trim()) : [],
+                        Medications: $('#medications').val() ? $('#medications').val().split(',').map(s => s.trim()) : [],
+                        Allergies: $('#allergies').val() ? $('#allergies').val().split(',').map(s => s.trim()) : []
+                    };
+                    $.ajax({
+                        url: 'http://localhost:3000/addpatient',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function(msg) {
+                            alert('Patient added successfully!');
+                            // Reset form and remove validation classes
+                            $('#addPatientForm')[0].reset();
+                            $('#addPatientForm').find('.is-invalid').removeClass('is-invalid');
+                            // Re-autofill today's date after reset
+                            $("#lastVisit").val(new Date().toISOString().split("T")[0]);
+                        },
+                        error: function(xhr) {
+                            alert(xhr.responseText || 'Error adding patient!');
+                        }
+                    });
                 });
 
                 //capitalize first letter of first and last name
