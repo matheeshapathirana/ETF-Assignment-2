@@ -129,7 +129,7 @@
                 const [type, term] = [$('#searchType').val(), $('#searchTerm').val().trim().toLowerCase()];
                 if (!type || !term) {
                     alert('Select a search type and term.');
-                    $(#searchType, #searchTerm).filter((_, el) => !$(el).val()).addClass('is-invalid');
+                    $('#searchType, #searchTerm').filter((_, el) => !$(el).val()).addClass('is-invalid');
                     return;
                 }
                 fetchPatients(patients => {
