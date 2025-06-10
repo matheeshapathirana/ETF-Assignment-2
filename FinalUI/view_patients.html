@@ -81,29 +81,40 @@
                 setDarkMode(!$('body').hasClass('dark-mode'));
             });
 
-            // View Patients
+            // Fetch and display all patients from backend
             function loadPatients() {
-                const patients = JSON.parse(localStorage.getItem('patients')) || [];
-                const tbody = $('#patientTable tbody');
-                tbody.empty();
-                if (patients.length > 0) {
-                    patients.forEach(function(patient) {
+                $.ajax({
+                url: 'http://localhost:3000/searchpatients',
+                method: 'GET',
+                success: function(data) {
+                    const tbody = $('#patientTable tbody');
+                    tbody.empty();
+                    if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(function(patient) {
                         tbody.append(`
-                            <tr>
-                                <td>${patient.PID}</td>
-                                <td>${patient.FirstName}</td>
-                                <td>${patient.LastName}</td>
-                                <td>${patient.NearCity}</td>
-                                <td>${patient.Doctor}</td>
-                                <td>${patient.Guardian}</td>
-                                <td>${patient.Status}</td>
-                            </tr>
+                        <tr>
+                            <td>${patient.PID}</td>
+                            <td>${patient.FirstName}</td>
+                            <td>${patient.LastName}</td>
+                            <td>${patient.NearCity}</td>
+                            <td>${patient.Doctor}</td>
+                            <td>${patient.Guardian}</td>
+                            <td>${patient.Status}</td>
+                        </tr>
                         `);
                     });
-                } else {
+                    } else {
                     tbody.append('<tr><td colspan="7" class="text-center">No patients found.</td></tr>');
+                    }
+                },
+                error: function() {
+                    const tbody = $('#patientTable tbody');
+                    tbody.empty();
+                    tbody.append('<tr><td colspan="7" class="text-center text-danger">Error loading patients.</td></tr>');
                 }
-            }
+                });
+            };
+            
             loadPatients();
             $('#refreshBtn').click(loadPatients);
         });
