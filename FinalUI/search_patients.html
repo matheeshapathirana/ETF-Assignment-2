@@ -47,7 +47,7 @@
 </head>
 <body>
     <script>
-        $(document).ready(function() {
+       $(document).ready(function() {
             // Dark mode setup
             const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
             function setDarkMode(isDark) {
@@ -61,11 +61,11 @@
                 setDarkMode(!$('body').hasClass('dark-mode'));
             });
 
-            // Search Patients
+            // Search Patients (AJAX to backend)
             $('#searchForm').on('submit', function(e) {
                 e.preventDefault();
                 const searchType = $('#searchType').val();
-                const searchValue = $('#searchValue').val().trim().toLowerCase();
+                const searchValue = $('#searchValue').val().trim();
                 if (!searchType) {
                     alert('Please select a search type.');
                     return;
@@ -74,37 +74,46 @@
                     alert('Please enter a search term.');
                     return;
                 }
-                const patients = JSON.parse(localStorage.getItem('patients')) || [];
-                const results = patients.filter(patient => {
-                    if (searchType === 'pid') return patient.PID.toLowerCase() === searchValue;
-                    if (searchType === 'firstName') return patient.FirstName.toLowerCase() === searchValue;
-                    if (searchType === 'lastName') return patient.LastName.toLowerCase() === searchValue;
-                    if (searchType === 'email') return patient.Email.toLowerCase() === searchValue;
-                    if (searchType === 'doctor') return patient.Doctor.toLowerCase() === searchValue;
-                    if (searchType === 'NearestCity') return patient.NearCity.toLowerCase() === searchValue;
-                    if (searchType === 'guardian') return patient.Guardian.toLowerCase() === searchValue;
-                    return false;
-                });
-                const tbody = $('#resultsBody');
-                tbody.empty();
-                if (results.length > 0) {
-                    results.forEach(function(patient) {
-                        tbody.append(`
-                            <tr>
-                                <td>${patient.PID}</td>
-                                <td>${patient.FirstName}</td>
-                                <td>${patient.LastName}</td>
-                                <td>${patient.Email || 'N/A'}</td>
-                                <td>${patient.NearCity}</td>
-                                <td>${patient.Doctor}</td>
-                                <td>${patient.Guardian}</td>
-                            </tr>
-                        `);
-                    });
-                } else {
-                    tbody.append('<tr><td colspan="7" class="text-center">No patients found.</td></tr>');
+                // Build query param for backend
+                let queryParam = '';
+                switch (searchType) {
+                    case 'pid': queryParam = 'PID=' + encodeURIComponent(searchValue); break;
+                    case 'firstName': queryParam = 'FirstName=' + encodeURIComponent(searchValue); break;
+                    case 'lastName': queryParam = 'LastName=' + encodeURIComponent(searchValue); break;
+                    case 'email': queryParam = 'Email=' + encodeURIComponent(searchValue); break;
+                    case 'doctor': queryParam = 'Doctor=' + encodeURIComponent(searchValue); break;
+                    case 'NearestCity': queryParam = 'NearCity=' + encodeURIComponent(searchValue); break;
+                    case 'guardian': queryParam = 'Guardian=' + encodeURIComponent(searchValue); break;
                 }
-                $('#searchValue').val('');
+                $.ajax({
+                    url: 'http://localhost:3000/searchpatients?' + queryParam,
+                    method: 'GET',
+                    success: function(results) {
+                        const tbody = $('#resultsBody');
+                        tbody.empty();
+                        if (Array.isArray(results) && results.length > 0) {
+                            results.forEach(function(patient) {
+                                tbody.append(`
+                                    <tr>
+                                        <td>${patient.PID}</td>
+                                        <td>${patient.FirstName}</td>
+                                        <td>${patient.LastName}</td>
+                                        <td>${patient.Email || 'N/A'}</td>
+                                        <td>${patient.NearCity}</td>
+                                        <td>${patient.Doctor}</td>
+                                        <td>${patient.Guardian}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            tbody.append('<tr><td colspan="7" class="text-center">No patients found.</td></tr>');
+                        }
+                        $('#searchValue').val('');
+                    },
+                    error: function() {
+                        alert('Error searching patients.');
+                    }
+                });
             });
             $('#searchValue').on('input', function() {
                 const searchType = $('#searchType').val();
@@ -193,6 +202,7 @@
             </section>
         </div>
     </main>
+
 
     <footer class="bg-dark text-light py-4 mt-5">
         <div class="container text-center">

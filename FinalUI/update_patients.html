@@ -108,21 +108,19 @@
             setDarkMode(localStorage.getItem('darkMode') === '1');
             $darkModeBtn.click(() => setDarkMode(!$('body').hasClass('dark-mode')));
 
-            // Fetch patients
+            // Fetch patients from backend (MongoDB)
             const fetchPatients = callback => {
-                let patients = JSON.parse(localStorage.getItem('patients') || '[]');
-                if (patients.patients || patients.Patients) patients = patients.patients || patients.Patients;
-                if (patients.length) return callback(patients);
-                $.getJSON('patients.json')
-                    .done(data => {
-                        patients = data.patients || data.Patients || data;
-                        localStorage.setItem('patients', JSON.stringify(patients));
-                        callback(patients);
-                    })
-                    .fail(() => {
-                        alert('Error loading patient data.');
+                $.ajax({
+                    url: 'http://localhost:3000/searchpatients',
+                    method: 'GET',
+                    success: function(data) {
+                        callback(Array.isArray(data) ? data : []);
+                    },
+                    error: function() {
+                        alert('Error loading patient data from server.');
                         callback([]);
-                    });
+                    }
+                });
             };
 
             // Search patient
@@ -131,7 +129,7 @@
                 const [type, term] = [$('#searchType').val(), $('#searchTerm').val().trim().toLowerCase()];
                 if (!type || !term) {
                     alert('Select a search type and term.');
-                    $(`#searchType, #searchTerm`).filter((_, el) => !$(el).val()).addClass('is-invalid');
+                    $(#searchType, #searchTerm).filter((_, el) => !$(el).val()).addClass('is-invalid');
                     return;
                 }
                 fetchPatients(patients => {
@@ -152,17 +150,33 @@
                     $('#editAllergies').val(Array.isArray(p.Allergies) ? p.Allergies.join(', ') : p.Allergies || p.allergies || '');
                     $('#editStatus').val(p.Status || p.status || 'Alive');
                     $('#editLastVisit').val(p.LastVisitDate || p.lastVisit || today);
-                    $('#deletePatientBtn').toggle(type === 'pid');
+                    // Always show delete button when a patient is found
+                    $('#deletePatientBtn').show();
                     $('#patientFormContainer').show();
                 });
             });
 
-            // Update patient
+            // Helper: validate function (ensure it exists)
+            function validate($el, isEmail) {
+                const val = $el.val().trim();
+                if (!val) {
+                    $el.addClass('is-invalid');
+                    return false;
+                }
+                if (isEmail && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    $el.addClass('is-invalid');
+                    return false;
+                }
+                $el.removeClass('is-invalid');
+                return true;
+            }
+
+            // Update patient (AJAX to backend)
             $('#updatePatientForm').submit(e => {
                 e.preventDefault();
                 let valid = true;
-                $('#updatePatientForm [required]').each(function() { valid &= validate($(this), false); });
-                valid &= validate($('#editEmail'), true);
+                $('#updatePatientForm [required]').each(function() { valid = validate($(this), false) && valid; });
+                valid = validate($('#editEmail'), true) && valid;
                 if (!valid) return alert('Please fill all required fields.');
                 const patient = {
                     PID: $('#editPid').val(),
@@ -178,25 +192,37 @@
                     Status: $('#editStatus').val(),
                     LastVisitDate: $('#editLastVisit').val()
                 };
-                fetchPatients(patients => {
-                    const idx = patients.findIndex(p => String(p.PID || p.pid || '').trim() === String($('#originalPid').val()).trim());
-                    if (idx === -1) return alert('Patient not found.');
-                    patients[idx] = patient;
-                    localStorage.setItem('patients', JSON.stringify(patients));
-                    alert('Patient updated successfully!');
-                    resetForm();
+                // AJAX PUT to backend
+                $.ajax({
+                    url: 'http://localhost:3000/updatepatient/pid/' + encodeURIComponent($('#originalPid').val()),
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(patient),
+                    success: function(res) {
+                        alert('Patient updated successfully!');
+                        // Re-search for the updated patient to show new details
+                        $('#searchPatientForm').submit();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseText || 'Error updating patient!');
+                    }
                 });
             });
 
-            // Delete patient
+            // Delete patient (AJAX to backend)
             $('#deletePatientBtn').click(() => {
                 if (!confirm('Delete this patient record?')) return;
-                fetchPatients(patients => {
-                    const pid = String($('#originalPid').val()).trim();
-                    patients = patients.filter(p => String(p.PID || p.pid || '').trim() !== pid);
-                    localStorage.setItem('patients', JSON.stringify(patients));
-                    alert('Patient deleted successfully.');
-                    resetForm();
+                const pid = String($('#originalPid').val()).trim();
+                $.ajax({
+                    url: 'http://localhost:3000/deletepatient/' + encodeURIComponent(pid),
+                    method: 'DELETE',
+                    success: function(res) {
+                        alert('Patient deleted successfully.');
+                        resetForm();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseText || 'Error deleting patient!');
+                    }
                 });
             });
 
