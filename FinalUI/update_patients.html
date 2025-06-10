@@ -94,149 +94,97 @@
 </head>
 <body>
     <script>
-        $(document).ready(function() {
-            // Dark mode setup
-            const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
-            function setDarkMode(isDark) {
+        $(document).ready(() => {
+            const today = new Date().toISOString().split('T')[0];
+            const $darkModeBtn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
+
+            // Dark mode
+            const setDarkMode = isDark => {
                 $('body, html').toggleClass('dark-mode', isDark);
-                btn.text(isDark ? 'Light Mode' : 'Dark Mode');
-                localStorage.setItem('darkMode', isDark ? '1' : '0');
-            }
-            $('.navbar .container-fluid').append(btn);
+                $darkModeBtn.text(isDark ? 'Light Mode' : 'Dark Mode');
+                localStorage.setItem('darkMode', isDark);
+            };
+            $('.navbar .container-fluid').append($darkModeBtn);
             setDarkMode(localStorage.getItem('darkMode') === '1');
-            btn.on('click', function() {
-                setDarkMode(!$('body').hasClass('dark-mode'));
+            $darkModeBtn.click(() => setDarkMode(!$('body').hasClass('dark-mode')));
+
+            // Form setup
+            $('#editLastVisit').val(today);
+            $('#editFirstName, #editLastName').blur(function() {
+                const val = $(this).val().trim();
+                if (val) $(this).val(val[0].toUpperCase() + val.slice(1).toLowerCase());
             });
 
-            // Set default last visit date
-            $("#editLastVisit").val(new Date().toISOString().split("T")[0]);
-
-            // Name capitalization
-            $("#editFirstName, #editLastName").on("blur", function() {
-                const val = $(this).val();
-                if (val.length > 0) {
-                    $(this).val(val.charAt(0).toUpperCase() + val.slice(1).toLowerCase());
+            // Validation
+            const validate = ($el, isEmail) => {
+                const val = $el.val().trim();
+                if ($el.prop('required') && !val || isEmail && val && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val)) {
+                    $el.addClass('is-invalid');
+                    return false;
                 }
-            });
+                $el.removeClass('is-invalid');
+                return true;
+            };
+            $('#searchPatientForm, #updatePatientForm').on('input change', 'input[required], select[required]', function() { validate($(this), false); });
+            $('#editEmail').on('input', function() { validate($(this), true); });
 
-            // Form validation feedback
-            $('#searchPatientForm, #updatePatientForm').on('input change', 'input[required], select[required]', function() {
-                if ($(this).val().trim() === '') {
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-            $('#editEmail').on('input', function() {
-                const email = $(this).val().trim();
-                if (email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-
-            // Fetch patient data
-            function fetchPatients(callback) {
-                let patients = JSON.parse(localStorage.getItem('patients')) || [];
-                console.log('Raw patients from localStorage:', patients);
-                if (patients.length > 0) {
-                    if (patients.patients) patients = patients.patients;
-                    if (patients.Patients) patients = patients.Patients;
-                    callback(patients);
-                } else {
-                    $.getJSON('patients.json')
-                        .done(function(data) {
-                            console.log('Raw patients from patients.json:', data);
-                            let patientsData = data;
-                            if (data.patients) patientsData = data.patients;
-                            if (data.Patients) patientsData = data.Patients;
-                            localStorage.setItem('patients', JSON.stringify(patientsData));
-                            callback(patientsData);
-                        })
-                        .fail(function(jqxhr, textStatus, error) {
-                            console.error("Error loading patient data:", textStatus, error);
-                            alert('Error loading patient data. Please try again later.');
-                            callback([]);
-                        });
-                }
-            }
-
-            // Search patient form submission
-            $('#searchPatientForm').submit(function(e) {
-                e.preventDefault();
-                const searchType = $('#searchType').val();
-                const searchTerm = $('#searchTerm').val().trim().toLowerCase();
-                console.log('Search Type:', searchType, 'Search Term:', searchTerm);
-                if (!searchType || !searchTerm) {
-                    alert('Please select a search type and enter a term.');
-                    $('#searchType, #searchTerm').each(function() {
-                        if (!$(this).val()) $(this).addClass('is-invalid');
+            // Fetch patients
+            const fetchPatients = callback => {
+                let patients = JSON.parse(localStorage.getItem('patients') || '[]');
+                if (patients.patients || patients.Patients) patients = patients.patients || patients.Patients;
+                if (patients.length) return callback(patients);
+                $.getJSON('patients.json')
+                    .done(data => {
+                        patients = data.patients || data.Patients || data;
+                        localStorage.setItem('patients', JSON.stringify(patients));
+                        callback(patients);
+                    })
+                    .fail(() => {
+                        alert('Error loading patient data.');
+                        callback([]);
                     });
+            };
+
+            // Search patient
+            $('#searchPatientForm').submit(e => {
+                e.preventDefault();
+                const [type, term] = [$('#searchType').val(), $('#searchTerm').val().trim().toLowerCase()];
+                if (!type || !term) {
+                    alert('Select a search type and term.');
+                    $(`#searchType, #searchTerm`).filter((_, el) => !$(el).val()).addClass('is-invalid');
                     return;
                 }
-                fetchPatients(function(patients) {
-                    console.log('Patients being searched:', patients);
-                    const foundPatient = patients.find(patient => {
-                        if (!patient) return false;
-                        if (searchType === 'pid') {
-                            return String(patient.PID || patient.pid || '').trim().toLowerCase() === searchTerm;
-                        }
-                        if (searchType === 'firstName') {
-                            return String(patient.FirstName || patient.firstName || '').trim().toLowerCase() === searchTerm;
-                        }
-                        return false;
-                    });
-                    if (foundPatient) {
-                        console.log('Found Patient:', foundPatient);
-                        $('#originalPid').val(foundPatient.PID || foundPatient.pid);
-                        $('#editPid').val(foundPatient.PID || foundPatient.pid);
-                        $('#editFirstName').val(foundPatient.FirstName || foundPatient.firstName);
-                        $('#editLastName').val(foundPatient.LastName || foundPatient.lastName);
-                        $('#editEmail').val(foundPatient.Email || foundPatient.email || '');
-                        $('#editGuardian').val(foundPatient.Guardian || foundPatient.guardian);
-                        $('#editNearCity').val(foundPatient.NearCity || foundPatient.nearCity);
-                        $('#editDoctor').val(foundPatient.Doctor || foundPatient.doctor);
-                        $('#editMedications').val(foundPatient.Medications && Array.isArray(foundPatient.Medications) ? foundPatient.Medications.join(', ') : foundPatient.Medications || '');
-                        $('#editMedicalConditions').val(foundPatient.MedicalConditions && Array.isArray(foundPatient.MedicalConditions) ? foundPatient.MedicalConditions.join(', ') : foundPatient.MedicalConditions || '');
-                        $('#editAllergies').val(foundPatient.Allergies && Array.isArray(foundPatient.Allergies) ? foundPatient.Allergies.join(', ') : foundPatient.Allergies || foundPatient.allergies || '');
-                        $('#editStatus').val(foundPatient.Status || foundPatient.status || 'Alive');
-                        $('#editLastVisit').val(foundPatient.LastVisitDate || foundPatient.lastVisit || new Date().toISOString().split("T")[0]);
-                        $('#deletePatientBtn').toggle(searchType === 'pid');
-                        $('#patientFormContainer').show();
-                    } else {
-                        alert('Patient not found. Please try another search term.');
-                        $('#patientFormContainer').hide();
+                fetchPatients(patients => {
+                    const p = patients.find(p => String(p[type === 'pid' ? 'PID' : 'FirstName'] || p[type] || '').trim().toLowerCase() === term);
+                    if (!p) {
+                        alert('Patient not found.');
+                        return $('#patientFormContainer').hide();
                     }
+                    $('#originalPid, #editPid').val(p.PID || p.pid);
+                    $('#editFirstName').val(p.FirstName || p.firstName);
+                    $('#editLastName').val(p.LastName || p.lastName);
+                    $('#editEmail').val(p.Email || p.email || '');
+                    $('#editGuardian').val(p.Guardian || p.guardian);
+                    $('#editNearCity').val(p.NearCity || p.nearCity);
+                    $('#editDoctor').val(p.Doctor || p.doctor);
+                    $('#editMedications').val(Array.isArray(p.Medications) ? p.Medications.join(', ') : p.Medications || '');
+                    $('#editMedicalConditions').val(Array.isArray(p.MedicalConditions) ? p.MedicalConditions.join(', ') : p.MedicalConditions || '');
+                    $('#editAllergies').val(Array.isArray(p.Allergies) ? p.Allergies.join(', ') : p.Allergies || p.allergies || '');
+                    $('#editStatus').val(p.Status || p.status || 'Alive');
+                    $('#editLastVisit').val(p.LastVisitDate || p.lastVisit || today);
+                    $('#deletePatientBtn').toggle(type === 'pid');
+                    $('#patientFormContainer').show();
                 });
             });
 
-            // Update patient form submission
-            $('#updatePatientForm').submit(function(e) {
+            // Update patient
+            $('#updatePatientForm').submit(e => {
                 e.preventDefault();
-                let isValid = true;
-                $(this).find('input[required], select[required]').each(function() {
-                    if ($(this).val().trim() === '') {
-                        $(this).addClass('is-invalid');
-                        isValid = false;
-                    } else {
-                        $(this).removeClass('is-invalid');
-                    }
-                });
-                if (!isValid) {
-                    alert('Please fill all required fields.');
-                    return;
-                }
-                const email = $('#editEmail').val().trim();
-                if (email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-                    alert('Please enter a valid email address.');
-                    $('#editEmail').addClass('is-invalid');
-                    return;
-                } else {
-                    $('#editEmail').removeClass('is-invalid');
-                }
-                const originalPid = $('#originalPid').val();
-                const updatedPatient = {
+                let valid = true;
+                $('#updatePatientForm [required]').each(function() { valid &= validate($(this), false); });
+                valid &= validate($('#editEmail'), true);
+                if (!valid) return alert('Please fill all required fields.');
+                const patient = {
                     PID: $('#editPid').val(),
                     FirstName: $('#editFirstName').val(),
                     LastName: $('#editLastName').val(),
@@ -244,46 +192,40 @@
                     Guardian: $('#editGuardian').val(),
                     NearCity: $('#editNearCity').val(),
                     Doctor: $('#editDoctor').val(),
-                    Medications: $('#editMedications').val() ? $('#editMedications').val().split(',').map(s => s.trim()).filter(s => s) : [],
-                    MedicalConditions: $('#editMedicalConditions').val() ? $('#editMedicalConditions').val().split(',').map(s => s.trim()).filter(s => s) : [],
-                    Allergies: $('#editAllergies').val() ? $('#editAllergies').val().split(',').map(s => s.trim()).filter(s => s) : [],
+                    Medications: $('#editMedications').val().split(',').map(s => s.trim()).filter(s => s),
+                    MedicalConditions: $('#editMedicalConditions').val().split(',').map(s => s.trim()).filter(s => s),
+                    Allergies: $('#editAllergies').val().split(',').map(s => s.trim()).filter(s => s),
                     Status: $('#editStatus').val(),
                     LastVisitDate: $('#editLastVisit').val()
                 };
-                console.log('Updating patient:', updatedPatient);
-                let patients = JSON.parse(localStorage.getItem('patients')) || [];
-                if (patients.patients) patients = patients.patients;
-                if (patients.Patients) patients = patients.Patients;
-                const idx = patients.findIndex(p => String(p.PID || p.pid || '').trim() === String(originalPid).trim());
-                if (idx !== -1) {
-                    patients[idx] = updatedPatient;
+                fetchPatients(patients => {
+                    const idx = patients.findIndex(p => String(p.PID || p.pid || '').trim() === String($('#originalPid').val()).trim());
+                    if (idx === -1) return alert('Patient not found.');
+                    patients[idx] = patient;
                     localStorage.setItem('patients', JSON.stringify(patients));
                     alert('Patient updated successfully!');
-                    $('#updatePatientForm')[0].reset();
-                    $('#patientFormContainer').hide();
-                    $('#deletePatientBtn').hide();
-                    $("#editLastVisit").val(new Date().toISOString().split("T")[0]);
-                } else {
-                    alert('Patient not found.');
-                }
+                    resetForm();
+                });
             });
 
-            // Delete patient button
-            $('#deletePatientBtn').click(function() {
-                if (confirm('Are you sure you want to delete this patient record?')) {
-                    const pid = $('#originalPid').val();
-                    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-                    if (patients.patients) patients = patients.patients;
-                    if (patients.Patients) patients = patients.Patients;
-                    patients = patients.filter(p => String(p.PID || p.pid || '').trim() !== String(pid).trim());
+            // Delete patient
+            $('#deletePatientBtn').click(() => {
+                if (!confirm('Delete this patient record?')) return;
+                fetchPatients(patients => {
+                    const pid = String($('#originalPid').val()).trim();
+                    patients = patients.filter(p => String(p.PID || p.pid || '').trim() !== pid);
                     localStorage.setItem('patients', JSON.stringify(patients));
                     alert('Patient deleted successfully.');
-                    $('#updatePatientForm')[0].reset();
-                    $('#patientFormContainer').hide();
-                    $('#deletePatientBtn').hide();
-                    $("#editLastVisit").val(new Date().toISOString().split("T")[0]);
-                }
+                    resetForm();
+                });
             });
+
+            // Reset form
+            const resetForm = () => {
+                $('#updatePatientForm')[0].reset();
+                $('#patientFormContainer, #deletePatientBtn').hide();
+                $('#editLastVisit').val(today);
+            };
         });
     </script>
 
