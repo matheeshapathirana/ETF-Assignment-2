@@ -151,7 +151,7 @@
                     $('#editStatus').val(p.Status || p.status || 'Alive');
                     $('#editLastVisit').val(p.LastVisitDate || p.lastVisit || today);
                     // Always show delete button when a patient is found
-                    $('#deletePatientBtn').show();
+                    $('#deletePatientBtn').toggle(type === 'pid');
                     $('#patientFormContainer').show();
                 });
             });
