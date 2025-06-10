@@ -102,7 +102,7 @@
             const setDarkMode = isDark => {
                 $('body, html').toggleClass('dark-mode', isDark);
                 $darkModeBtn.text(isDark ? 'Light Mode' : 'Dark Mode');
-                localStorage.setItem('darkMode', isDark);
+                localStorage.setItem('darkMode', isDark ? '1' : '0');
             };
             $('.navbar .container-fluid').append($darkModeBtn);
             setDarkMode(localStorage.getItem('darkMode') === '1');
