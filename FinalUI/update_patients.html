@@ -200,6 +200,13 @@
                     data: JSON.stringify(patient),
                     success: function(res) {
                         alert('Patient updated successfully!');
+                        // Update the search term to match the possibly changed PID or First Name
+                        const searchType = $('#searchType').val();
+                        if (searchType === 'pid') {
+                            $('#searchTerm').val($('#editPid').val());
+                        } else if (searchType === 'firstName') {
+                            $('#searchTerm').val($('#editFirstName').val());
+                        }
                         // Re-search for the updated patient to show new details
                         $('#searchPatientForm').submit();
                     },
