@@ -11,7 +11,7 @@ app.listen(3000, () => {
 console.log("API running on port 3000");
 });
 
-// MongoDB connection
+// MongoDB connection (Hosted on a MongoDB Atlas server)
 mongoose.connect('mongodb+srv://user:user2006@etf-assignment.cp8rdvk.mongodb.net/Patients?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true
