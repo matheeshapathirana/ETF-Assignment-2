@@ -100,17 +100,18 @@
                             <td>${patient.Doctor}</td>
                             <td>${patient.Guardian}</td>
                             <td>${patient.Status}</td>
+                            <td>${patient.Email}</td>
                         </tr>
                         `);
                     });
                     } else {
-                    tbody.append('<tr><td colspan="7" class="text-center">No patients found.</td></tr>');
+                    tbody.append('<tr><td colspan="8" class="text-center">No patients found.</td></tr>');
                     }
                 },
                 error: function() {
                     const tbody = $('#patientTable tbody');
                     tbody.empty();
-                    tbody.append('<tr><td colspan="7" class="text-center text-danger">Error loading patients.</td></tr>');
+                    tbody.append('<tr><td colspan="8" class="text-center text-danger">Error loading patients.</td></tr>');
                 }
                 });
             };
@@ -156,6 +157,7 @@
                                     <th>Doctor</th>
                                     <th>Guardian</th>
                                     <th>Status</th>
+                                    <th>Email</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody"></tbody>
