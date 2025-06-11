@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Hospital Management System</title>
+    <title>Patient Management - Home</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         html, body {
@@ -18,16 +17,26 @@
         main {
             flex: 1;
         }
+
         .dark-mode {
             background-color: #181a1b !important;
             color: #f8f9fa !important;
         }
-        .dark-mode .bg-dark {
-            background-color: #23272b !important;
-        }
+        .dark-mode .bg-dark,
         .dark-mode .navbar,
         .dark-mode footer {
             background-color: #23272b !important;
+        }
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background-color: #23272b;
+            color: #f8f9fa;
+            border-color: #495057;
+        }
+        .dark-mode .form-control:focus,
+        .dark-mode .form-select:focus {
+            background-color: #23272b;
+            color: #f8f9fa;
         }
         .dark-mode .text-dark {
             color: #f8f9fa !important;
@@ -35,11 +44,33 @@
         .dark-mode .bg-white {
             background-color: #23272b !important;
         }
+
+        .dark-mode .accordion,
+        .dark-mode .accordion-item,
+        .dark-mode .accordion-body {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .accordion-item {
+            border-color: #495057 !important;
+        }
+        .dark-mode .accordion-button {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .accordion-button:not(.collapsed) {
+            background-color: #1a1d1f !important;
+            color: #ffc107 !important;
+        }
+        .dark-mode .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255,193,7,.25);
+        }
+
         .home-section {
             text-align: center;
             padding: 4rem 2rem;
             background-image: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
-            background-size: cover;
+            background-size: 100%;
             background-position: center;
             background-repeat: no-repeat;
             color: white;
@@ -50,7 +81,6 @@
             align-items: center;
             position: relative;
             margin-bottom: 3rem;
-            border-radius: 15px;
         }
         .home-section::before {
             content: '';
@@ -61,7 +91,6 @@
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.6);
             z-index: 0;
-            border-radius: 15px;
         }
         .home-content {
             position: relative;
@@ -81,6 +110,7 @@
             font-size: 1.2rem;
             margin-bottom: 2rem;
             line-height: 1.6;
+            color: #f8f9fa;
         }
         .home-btn {
             padding: 0.75rem 1.5rem;
@@ -97,161 +127,131 @@
             color: #212529;
             transform: translateY(-2px);
         }
-        .features-section {
+
+        .features-section-heading {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+        .dark-mode .features-section-heading {
+            color: #f8f9fa !important;
+            text-shadow: 0 1px 4px #000;
+        }
+        .main-features-section {
             padding: 4rem 0;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 2px solid #dee2e6;
+            background-color: white;
             border-radius: 15px;
         }
-        .dark-mode .features-section {
-            background: linear-gradient(135deg, #23272b 0%, #343a40 100%);
-        }
-        .feature-icon {
-            font-size: 2.8rem;
-            color: #0d6efd;
-            margin-bottom: 1.2rem;
-            transition: transform 0.3s ease;
-        }
-        .dark-mode .feature-icon {
-            color: #4dabf7;
-        }
-        .feature-card {
-            padding: 2.5rem;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            height: 100%;
-            background-color: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
-        }
-        .dark-mode .feature-card {
-            background-color: #343a40;
-            border: 1px solid #495057;
-        }
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-        }
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1);
-        }
-        .feature-card h3 {
-            margin-bottom: 1.2rem;
-            font-weight: 600;
-            font-size: 1.5rem;
-            color: #212529;
-        }
-        .dark-mode .feature-card h3 {
-            color: #f8f9fa;
-        }
-        .feature-card p {
-            color: #6c757d;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-        .dark-mode .feature-card p {
-            color: #adb5bd;
+        .dark-mode .main-features-section {
+            background-color: #23272b !important;
         }
     </style>
 </head>
 <body>
-    <script>
-        $(document).ready(function() {
-            // Dark mode setup
-            const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
-            function setDarkMode(isDark) {
-                $('body, html').toggleClass('dark-mode', isDark);
-                btn.text(isDark ? 'Light Mode' : 'Dark Mode');
-                localStorage.setItem('darkMode', isDark ? '1' : '0');
-            }
-            $('.navbar .container-fluid').append(btn);
-            setDarkMode(localStorage.getItem('darkMode') === '1');
-            btn.on('click', function() {
-                setDarkMode(!$('body').hasClass('dark-mode'));
-            });
+<script>
+    $(document).ready(function(){
+        // Dark mode toggle 
+        const btn = $('<button type="button" id="toggleDarkMode" class="btn btn-outline-light ms-2" style="min-width:110px;">Dark Mode</button>');
+        function setDarkMode(isDark) {
+            $('body, html').toggleClass('dark-mode', isDark);
+            btn.text(isDark ? 'Light Mode' : 'Dark Mode');
+            localStorage.setItem('darkMode', isDark ? '1' : '0');
+        }
+        $('.navbar .container-fluid').append(btn);
+        setDarkMode(localStorage.getItem('darkMode') === '1');
+        btn.on('click', function() {
+            setDarkMode(!$('body').hasClass('dark-mode'));
         });
-    </script>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">⛨ Hospital Management System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto" style="gap: 1.5rem;">
-                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="add_patient.html">Add Patient</a></li>
-                    <li class="nav-item"><a class="nav-link" href="view_patients.html">View Patients</a></li>
-                    <li class="nav-item"><a class="nav-link" href="update_patients.html">Update Patients</a></li>
-                    <li class="nav-item"><a class="nav-link" href="search_patients.html">Search</a></li>
-                </ul>
+    });
+</script>
+<!--Nav bar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="./index.html">⛨ Hospital Management System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto" style="gap: 1.5rem;">
+                <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="./add_patient.html">Add Patient</a></li>
+                <li class="nav-item"><a class="nav-link" href="./view_patients.html">View Patients</a></li>
+                <li class="nav-item"><a class="nav-link" href="./update_patients.html">Update Patients</a></li>
+                <li class="nav-item"><a class="nav-link" href="./search_patients.html">Search</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main>
+    <section class="home-section">
+        <div class="home-content">
+            <h1>Advanced Hospital Management System</h1>
+            <p>Streamline your healthcare operations with our comprehensive solution for patient records, appointments, and medical information management.</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="add_patient.html" class="home-btn">Add Patient</a>
+                <a href="view_patients.html" class="home-btn">View Patients</a>
             </div>
         </div>
-    </nav>
-
-    <main>
-        <div class="container mt-4">
-            <section class="home-section">
-                <div class="home-content">
-                    <h1>Advanced Hospital Management System</h1>
-                    <p>Streamline your healthcare operations with our comprehensive solution for patient records, appointments, and medical information management.</p>
-                    <div class="d-flex gap-3 justify-content-center">
-                        <a href="add_patient.html" class="home-btn">Add Patient</a>
-                        <a href="view_patients.html" class="home-btn">View Patients</a>
-                    </div>
-                </div>
-            </section>
-
-            <div class="features-section">
-                <div class="container">
-                    <h2 class="text-center mb-5">Our Key Features</h2>
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <h3>Patient Management</h3>
-                                <p>Efficiently manage patient records with detailed medical history, treatments, and appointments.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-search"></i>
-                                </div>
-                                <h3>Advanced Search</h3>
-                                <p>Quickly find patients using various search criteria including name, ID, or medical conditions.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-sync-alt"></i>
-                                </div>
-                                <h3>Real-time Updates</h3>
-                                <p>Keep patient records up-to-date with our easy-to-use update system and tracking.</p>
+    </section>
+    <div class="container">
+        <section class="main-features-section">
+            <div class="container">
+                <h3 class="features-section-heading">Our Key Features</h3>
+                <div class="accordion" id="featuresAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Patient Management
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#featuresAccordion">
+                            <div class="accordion-body">
+                                Efficiently manage patient records with detailed medical history, treatments, and appointments.
                             </div>
                         </div>
                     </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Advanced Search
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#featuresAccordion">
+                            <div class="accordion-body">
+                                Quickly find patients using various search criteria including name, ID, or medical conditions.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Real-Time Updates
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#featuresAccordion">
+                            <div class="accordion-body">
+                                Keep patient records up-to-date with our easy-to-use update system and tracking.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container text-center">
-            <nav class="mb-3">
-                <a href="index.html" class="text-decoration-none text-light mx-2">Home</a>
-                <a href="add_patient.html" class="text-decoration-none text-light mx-2">Add Patients</a>
-                <a href="view_patients.html" class="text-decoration-none text-light mx-2">View Patients</a>
-                <a href="update_patients.html" class="text-decoration-none text-light mx-2">Update Patients</a>
-                <a href="search_patients.html" class="text-decoration-none text-light mx-2">Search</a>
-            </nav>
-            <hr class="border-secondary my-3" style="max-width: 600px; margin: auto;">
-            <p class="mb-0">© 2025 Hospital Management System - All Rights Reserved</p>
-        </div>
-    </footer>
+        </section>
+    </div>
+</main>
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container text-center">
+        <nav class="mb-3">
+            <a href="./index.html" class="text-decoration-none text-light mx-2">Home</a>
+            <a href="./add_patient.html" class="text-decoration-none text-light mx-2">Add Patients</a>
+            <a href="./view_patients.html" class="text-decoration-none text-light mx-2">View Patients</a>
+            <a href="./update_patients.html" class="text-decoration-none text-light mx-2">Update Patients</a>
+            <a href="./search_patients.html" class="text-decoration-none text-light mx-2">Search</a>
+        </nav>
+        <hr class="border-secondary my-3" style="max-width: 600px; margin: auto;">
+        <p class="mb-0">© 2025 ETF Assignment - Group 13</p>
+    </div>
+</footer>
 </body>
 </html>
