@@ -11,9 +11,8 @@ app.listen(3000, () => {
 console.log("API running on port 3000");
 });
 
-// MongoDB connection (Hosted on a MongoDB Atlas server)
-//mongodb://localhost:27017/Patients?retryWrites=true&w=majority
-mongoose.connect('mongodb+srv://user:user2006@etf-assignment.cp8rdvk.mongodb.net/Patients?retryWrites=true&w=majority', {
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/Patients?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('Connected to MongoDB Atlas (Patients database)'))
