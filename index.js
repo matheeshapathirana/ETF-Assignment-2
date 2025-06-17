@@ -12,7 +12,7 @@ console.log("API running on port 3000");
 });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/Patients?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://user:user2006@etf-assignment.cp8rdvk.mongodb.net/Patients?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('Connected to MongoDB Atlas (Patients database)'))
@@ -119,6 +119,7 @@ app.get("/searchpatients", async (req, res) => {
   if (req.query.NearCity) query.NearCity = req.query.NearCity;
   if (req.query.Doctor) query.Doctor = req.query.Doctor;
   if (req.query.Guardian) query.Guardian = req.query.Guardian;
+  if (req.query.Status) query.Status = req.query.Status;
   try {
     const patients = await PatientModel.find(query).lean();
     res.json(patients);
